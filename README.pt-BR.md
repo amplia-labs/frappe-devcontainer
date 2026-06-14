@@ -31,6 +31,7 @@ O template entrega:
 - Serviços Redis separados para cache e fila.
 - Portas encaminhadas para o servidor web e assets em desenvolvimento.
 - Extensões recomendadas do VS Code para Python, SQL, Vue, Prettier e Ruff.
+- OpenCode e Claude Code instalados dentro do Dev Container.
 - Automação via `make` apenas para o bootstrap inicial da bench local.
 - Exemplos opcionais comentados para Mailpit e Cypress.
 
@@ -60,7 +61,7 @@ Após o bootstrap, a bench será criada em `frappe-bench`.
 
 1. Abra este repositório no VS Code.
 2. Execute **Dev Containers: Reopen in Container** pela Command Palette.
-3. Aguarde o container iniciar e instalar o `pre-commit` via `uv`.
+3. Aguarde o container iniciar e instalar `pre-commit`, OpenCode e Claude Code.
 4. No terminal do VS Code, rode:
 
 ```bash
@@ -163,6 +164,26 @@ Portas disponíveis:
 | `8000-8005` | Servidor web Frappe. |
 | `9000-9005` | Assets/watchers em desenvolvimento. |
 | `6787` | Porta encaminhada pelo Dev Container para ferramentas auxiliares. |
+
+## Agentes de IA
+
+Claude Code e OpenCode são instalados pelo `postCreateCommand` usando os instaladores nativos oficiais. Ambos ficam disponíveis no terminal do Dev Container:
+
+```bash
+opencode
+claude
+```
+
+O Dev Container usa volumes Docker para configurações e sessões dos agentes, preservando os dados entre rebuilds sem reaproveitar o estado dos agentes do host:
+
+| Volume | Caminho no container | Uso |
+| --- | --- | --- |
+| `frappe-devcontainer-claude` | `/home/frappe/.claude` | Settings, agentes, comandos, backups e estado persistido do Claude Code. |
+| `frappe-devcontainer-opencode` | `/home/frappe/.opencode` | Binário, configuração, autenticação, sessões, estado e cache do OpenCode. |
+
+Claude Code usa `CLAUDE_CONFIG_DIR=/home/frappe/.claude`, seguindo o padrão com volume usado por exemplos comuns de Dev Container para Claude Code. OpenCode usa um wrapper que aponta todos os seus diretórios XDG (config/data/state/cache) para dentro de `/home/frappe/.opencode`, mantendo tudo em um único volume sem substituir `/home/frappe/.local` e preservando as ferramentas fornecidas pela imagem base. Como esses volumes são criados vazios e pertencentes ao `root`, o `post-create.sh` os transfere para o usuário `frappe` antes de instalar os agentes.
+
+Execute cada ferramenta uma vez dentro do container para autenticar ou configurar os providers.
 
 ## Recursos opcionais
 
