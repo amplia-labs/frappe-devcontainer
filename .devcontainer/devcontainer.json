@@ -26,7 +26,9 @@
                 "mtxr.sqltools-driver-mysql",
                 "vue.volar",
                 "esbenp.prettier-vscode",
-                "charliermarsh.ruff"
+                "charliermarsh.ruff",
+                "anthropic.claude-code",
+                "sst-dev.opencode"
             ],
             "settings": {
                 "terminal.integrated.profiles.linux": {
@@ -60,8 +62,14 @@
     "service": "frappe",
     "workspaceFolder": "/workspace",
     "shutdownAction": "stopCompose",
-    "postCreateCommand": "uv tool install pre-commit",
+    "remoteEnv": {
+        "PATH": "${containerEnv:PATH}:/home/frappe/.local/bin:/home/frappe/.opencode/bin",
+        "CLAUDE_CONFIG_DIR": "/home/frappe/.claude"
+    },
+    "postCreateCommand": "bash /workspace/.devcontainer/scripts/post-create.sh",
     "mounts": [
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached"
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/frappe/.ssh,type=bind,consistency=cached",
+        "source=frappe-devcontainer-claude,target=/home/frappe/.claude,type=volume",
+        "source=frappe-devcontainer-opencode,target=/home/frappe/.opencode,type=volume"
     ]
 }
